@@ -100,11 +100,14 @@
     },
     "api_server": {
         "enabled": true,
-        "listen_ip_address": "127.0.0.1",
+        "listen_ip_address": "0.0.0.0",
         "listen_port": 8088,
         "verbosity": "error",
         "jwt_secret_key": "4aa3067248122b059863fcdd297afa7a66a9f8e55680f314a8dd02d15a8de79f",
-        "CORS_origins": [],
+        "CORS_origins": [
+            "http://114.29.236.118:8088",
+            "https://ui.freqtrade.io"
+        ],
         "username": "freqtrader",
         "password": "SuperSecurePassword"
     },
