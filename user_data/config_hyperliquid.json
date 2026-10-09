@@ -1,0 +1,122 @@
+{
+    "$schema": "https://schema.freqtrade.io/schema.json",
+    "max_open_trades": 3,
+    "stake_currency": "USDC",
+    "stake_amount": 25,
+    "tradable_balance_ratio": 0.99,
+    "fiat_display_currency": "USD",
+    "timeframe": "5m",
+    "dry_run": true,
+    "dry_run_wallet": 100,
+    "cancel_open_orders_on_exit": false,
+    "logfile": "user_data/logs/freqtrade.log",
+    "trading_mode": "futures",
+    "margin_mode": "isolated",
+    "unfilledtimeout": {
+        "entry": 10,
+        "exit": 10,
+        "exit_timeout_count": 0,
+        "unit": "minutes"
+    },
+    "entry_pricing": {
+        "price_side": "same",
+        "use_order_book": false
+    },
+    "exit_pricing": {
+        "price_side": "same",
+        "use_order_book": false
+    },
+    "order_types": {
+        "entry": "limit",
+        "exit": "limit",
+        "emergency_exit": "market",
+        "force_exit": "market",
+        "force_entry": "market",
+        "stoploss": "market",
+        "stoploss_on_exchange": false
+    },
+    "order_time_in_force": {
+        "entry": "GTC",
+        "exit": "GTC"
+    },
+    "exchange": {
+        "name": "hyperliquid",
+        "enable_ws": false,
+        "api_key": "",
+        "secret": "",
+        "ccxt_config": {
+            "enableRateLimit": true,
+            "rateLimit": 800,
+            "timeout": 30000,
+            "options": {
+                "defaultType": "swap",
+                "fetchMarkets": {
+                    "types": [
+                        "swap"
+                    ]
+                },
+                "hip3TokensByName": {},
+                "cachedCurrenciesById": {}
+            }
+        },
+        "ccxt_async_config": {
+            "enableRateLimit": true,
+            "rateLimit": 800,
+            "timeout": 30000,
+            "options": {
+                "defaultType": "swap",
+                "fetchMarkets": {
+                    "types": [
+                        "swap"
+                    ]
+                },
+                "hip3TokensByName": {},
+                "cachedCurrenciesById": {}
+            }
+        },
+        "pair_whitelist": [
+            "BTC/USDC:USDC",
+            "ETH/USDC:USDC",
+            "SOL/USDC:USDC",
+            "SUI/USDC:USDC",
+            "ARB/USDC:USDC",
+            "OP/USDC:USDC",
+            "NEAR/USDC:USDC",
+            "APT/USDC:USDC",
+            "DOGE/USDC:USDC",
+            "WLD/USDC:USDC"
+        ],
+        "pair_blacklist": []
+    },
+    "pairlists": [
+        {
+            "method": "StaticPairList"
+        }
+    ],
+    "telegram": {
+        "enabled": false,
+        "token": "",
+        "chat_id": ""
+    },
+    "api_server": {
+        "enabled": true,
+        "listen_ip_address": "127.0.0.1",
+        "listen_port": 8088,
+        "verbosity": "error",
+        "jwt_secret_key": "4aa3067248122b059863fcdd297afa7a66a9f8e55680f314a8dd02d15a8de79f",
+        "CORS_origins": [],
+        "username": "freqtrader",
+        "password": "SuperSecurePassword"
+    },
+    "bot_name": "hyperliquid_bot",
+    "db_url": "sqlite:///user_data/tradesv3.dryrun.sqlite",
+    "initial_state": "running",
+    "force_entry_enable": false,
+    "internals": {
+        "process_throttle_secs": 15,
+        "heartbeat_interval": 60
+    },
+    "strategy": "NostalgiaForInfinityX8",
+    "dataformat_ohlcv": "feather",
+    "dataformat_trades": "feather"
+}

@@ -19,7 +19,9 @@ from freqtrade.exceptions import (
 )
 from freqtrade.exchange import Exchange
 from freqtrade.exchange.common import retrier
-from freqtrade.exchange.exchange_types import CcxtBalances, CcxtOrder, CcxtPosition, FtHas
+from freqtrade.exchange.exchange_types import CcxtBalances, CcxtOrder, CcxtPosition, FtHas, Ticker
+from freqtrade.misc import deep_merge_dicts
+from freqtrade.util import FtTTLCache
 from freqtrade.util.datetime_helpers import dt_from_ts
 
 
@@ -32,6 +34,10 @@ class Hyperliquid(Exchange):
     """
 
     unified_account = False
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._hl_ticker_cache: FtTTLCache = FtTTLCache(maxsize=1, ttl=10)
 
     _ft_has: FtHas = {
         "ohlcv_has_history": False,
@@ -65,11 +71,45 @@ class Hyperliquid(Exchange):
     @property
     def _ccxt_config(self) -> dict:
         # ccxt Hyperliquid defaults to swap
-        config = {}
+        market_type = "spot" if self.trading_mode == TradingMode.SPOT else "swap"
+        config = {
+            "options": {
+                "fetchMarkets": {
+                    "types": [market_type]
+                },
+                "hip3TokensByName": {},
+                "cachedCurrenciesById": {},
+            }
+        }
         if self.trading_mode == TradingMode.SPOT:
-            config.update({"options": {"defaultType": "spot"}})
-        config.update(super()._ccxt_config)
+            config["options"]["defaultType"] = "spot"
+        config = deep_merge_dicts(config, super()._ccxt_config)
         return config
+
+    @retrier
+    def fetch_ticker(self, pair: str) -> Ticker:
+        if pair not in self.markets or self.markets[pair].get("active", False) is False:
+            raise ExchangeError(f"Pair {pair} not available")
+        with self._cache_lock:
+            cached_tickers = self._hl_ticker_cache.get("tickers")
+        if not cached_tickers:
+            try:
+                cached_tickers = self.get_tickers(cached=False, market_type=self.trading_mode)
+                if cached_tickers:
+                    with self._cache_lock:
+                        self._hl_ticker_cache["tickers"] = cached_tickers
+            except (TemporaryError, DDosProtection):
+                raise
+            except (ccxt.OperationFailed, ccxt.ExchangeError) as e:
+                raise TemporaryError(
+                    f"Could not load ticker due to {e.__class__.__name__}. Message: {e}"
+                ) from e
+            except ccxt.BaseError as e:
+                raise OperationalException(e) from e
+
+        if cached_tickers and pair in cached_tickers:
+            return cached_tickers[pair]
+        return super().fetch_ticker(pair)
 
     @retrier
     def additional_exchange_init(self) -> None:

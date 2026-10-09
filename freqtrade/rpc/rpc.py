@@ -798,7 +798,8 @@ class RPC:
         Returns the historic balance of the bot
         :return: DataFrame with the balance history and the timestamp of the migration
         """
-        results = read_sql("wallet_history", con=Trade.session.bind, parse_dates=["timestamp"])
+        with Trade.session.bind.connect() as con:
+            results = read_sql("wallet_history", con=con, parse_dates=["timestamp"])
 
         results = results.rename({"timestamp": "date"}, axis=1)
         results.loc[:, "__date_ts"] = results.loc[:, "date"].dt.as_unit("ms").astype("int64")

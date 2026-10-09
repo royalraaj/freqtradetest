@@ -69,9 +69,17 @@ def init_db(db_url: str) -> None:
     if db_url.startswith("sqlite://"):
         kwargs.update(
             {
-                "connect_args": {"check_same_thread": False},
+                "connect_args": {"check_same_thread": False, "timeout": 60},
             }
         )
+        if db_url != "sqlite://":
+            kwargs.update(
+                {
+                    "pool_size": 20,
+                    "max_overflow": 40,
+                    "pool_timeout": 60,
+                }
+            )
 
     try:
         engine = create_engine(db_url, future=True, **kwargs)
